@@ -24,8 +24,9 @@ class CodeGenerator {
             code += " }";
             if (i !== matrices.length - 1) {
                 code += ",";
+            } else {
+                code += "\n";
             }
-            code += "\n";
         }
         code += "};";
 
@@ -35,7 +36,7 @@ class CodeGenerator {
 
 class MatrixDesigner {
 
-    constructor(canvasOptions, textbox) {
+    constructor(canvasOptions, textbox, framePreviousButton, frameNextButton, frameNewButton, frameDisplay) {
         this.matrices = [[0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00]];
         this.canvasOptions = canvasOptions;
         this.codeGen = new CodeGenerator();
@@ -43,9 +44,40 @@ class MatrixDesigner {
         this.canvasOptions.canvas.addEventListener("click", (event) => {
             this.handleCanvasClick(event);
         });
-        this.frames = 1;
+
+        this.buttons = {
+            framePrevious: framePreviousButton,
+            frameNext: frameNextButton,
+            frameNew: frameNewButton,
+            frameDisplay: frameDisplay
+        };
+
+        this.buttons.framePrevious.addEventListener("click", () => {
+            if (this.currentFrame > 0) {
+                this.currentFrame -= 1;
+                this.refreshButtons();
+                this.refresh();
+            }
+        });
+
+        this.buttons.frameNext.addEventListener("click", () => {
+            if (this.currentFrame < this.matrices.length - 1) {
+                this.currentFrame += 1;
+                this.refreshButtons();
+                this.refresh();
+            }
+        });
+
+        this.buttons.frameNew.addEventListener("click", () => {
+            this.matrices.push([0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00]);
+            this.currentFrame += 1;
+            this.refreshButtons();
+            this.refresh();
+        });
+
         this.currentFrame = 0;
         this.refresh();
+        this.refreshButtons();
     }
 
     handleCanvasClick(event) {
@@ -70,16 +102,17 @@ class MatrixDesigner {
         this.textbox.innerText = this.codeGen.generateCode(this.matrices);
     }
 
+    refreshButtons() {
+        this.buttons.framePrevious.disabled = (this.currentFrame == 0);
+        this.buttons.frameNext.disabled = (this.currentFrame == this.matrices.length - 1);
+        this.buttons.frameDisplay.innerText = `Frame #${this.currentFrame + 1}`;
+    }
+
     drawMatrix() {
-        
         for (let i = 0; i < this.matrices[this.currentFrame].length; i++) {
-    
             for (let j = 0; j < this.matrices[this.currentFrame].length; j++) {
-                
                 this.drawSingleCircle(j, i);
-                
             }
-    
         }
     }
 
@@ -115,7 +148,14 @@ class MatrixDesigner {
 
 function init() {
 
-    new MatrixDesigner(new CanvasOptions("canvas", "#FF0000", "#555555", 400, 400), document.getElementById("output"));
+    new MatrixDesigner(
+        new CanvasOptions("canvas", "#FF0000", "#555555", 400, 400),
+        document.getElementById("output"),
+        document.getElementById("frame-previous"),
+        document.getElementById("frame-next"),
+        document.getElementById("frame-new"),
+        document.getElementById("frame-display")
+    );
 
 }
 
