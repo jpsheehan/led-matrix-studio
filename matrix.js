@@ -36,7 +36,7 @@ class CodeGenerator {
 
 class MatrixDesigner {
 
-    constructor(canvasOptions, textbox, framePreviousButton, frameNextButton, frameNewButton, frameDisplay) {
+    constructor(canvasOptions, textbox, framePreviousButton, frameNextButton, frameNewButton, frameDisplay, animationFPS, animationPlayPauseButton) {
         this.matrices = [[0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00]];
         this.canvasOptions = canvasOptions;
         this.codeGen = new CodeGenerator();
@@ -49,7 +49,9 @@ class MatrixDesigner {
             framePrevious: framePreviousButton,
             frameNext: frameNextButton,
             frameNew: frameNewButton,
-            frameDisplay: frameDisplay
+            frameDisplay: frameDisplay,
+            animationFPS: animationFPS,
+            animationPlayPause: animationPlayPauseButton
         };
 
         this.buttons.framePrevious.addEventListener("click", () => {
@@ -70,10 +72,40 @@ class MatrixDesigner {
 
         this.buttons.frameNew.addEventListener("click", () => {
             this.matrices.push([0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00]);
-            this.currentFrame += 1;
+            this.currentFrame = this.matrices.length - 1;
             this.refreshButtons();
             this.refresh();
         });
+
+        this.buttons.animationPlayPause.addEventListener("click", () => {
+            if (this.animationState == "paused") {
+                this.animationState = "playing";
+                this.buttons.animationPlayPause.innerText = "Pause";
+                
+                this.currentFrame = 0;
+                this.refresh();
+                this.refreshButtons();
+
+                this.timer = setInterval(() => {
+                    if (this.currentFrame == this.matrices.length - 1) {
+                        this.currentFrame = 0; // loop the animation
+                    } else {
+                        this.currentFrame += 1;
+                    }
+                    this.refresh();
+                    this.refreshButtons();
+                }, 1000 / this.buttons.animationFPS.value);
+            } else {
+                this.animationState = "paused";
+                this.buttons.animationPlayPause.innerText = "Play";
+                this.refreshButtons();
+                clearInterval(this.timer);
+                this.timer = null;
+            }
+        });
+
+        this.animationState = "paused";
+        this.timer = null;
 
         this.currentFrame = 0;
         this.refresh();
@@ -103,9 +135,11 @@ class MatrixDesigner {
     }
 
     refreshButtons() {
-        this.buttons.framePrevious.disabled = (this.currentFrame == 0);
-        this.buttons.frameNext.disabled = (this.currentFrame == this.matrices.length - 1);
+        this.buttons.framePrevious.disabled = (this.currentFrame == 0 || this.animationState == "playing");
+        this.buttons.frameNext.disabled = (this.currentFrame == this.matrices.length - 1 || this.animationState == "playing");
         this.buttons.frameDisplay.innerText = `Frame #${this.currentFrame + 1}`;
+        this.buttons.animationFPS.disabled = (this.animationState == "playing");
+        this.buttons.frameNew.disabled = (this.animationState == "playing");
     }
 
     drawMatrix() {
@@ -154,7 +188,9 @@ function init() {
         document.getElementById("frame-previous"),
         document.getElementById("frame-next"),
         document.getElementById("frame-new"),
-        document.getElementById("frame-display")
+        document.getElementById("frame-display"),
+        document.getElementById("anim-fps"),
+        document.getElementById("anim-play-pause")
     );
 
 }
