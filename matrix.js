@@ -85,7 +85,7 @@ class MatrixDesigner {
                         0, 2 * Math.PI, true);
                     this.canvasOptions.context.closePath();
                     this.canvasOptions.context.fill();
-                    
+
                 }
     
             }
@@ -97,7 +97,7 @@ class MatrixDesigner {
 
 function init() {
 
-    new MatrixDesigner(new CanvasOptions("canvas", "#FF0000", "#eaeaea", 400, 400), document.getElementById("output"));
+    new MatrixDesigner(new CanvasOptions("canvas", "#FF0000", "#555555", 400, 400), document.getElementById("output"));
 
 }
 
