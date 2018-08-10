@@ -10,17 +10,24 @@ class CanvasOptions {
 }
 
 class CodeGenerator {
-    generateCode(matrix) {
-        let code = "char graphic[8] = { ";
-    
-        for (let i = 0; i < matrix.length; i++) {
-            code += "0x" + matrix[i].toString(16).toUpperCase().padLeft(2, 0);
-            if (i !== matrix.length - 1) {
-               code += ", ";
+    generateCode(matrices) {
+        let code = `char graphic[${matrices.length}][${matrices[0].length}] = { `;
+        
+        for (let i = 0; i < matrices.length; i++) {
+            code += "\n\t{ ";
+            for (let j = 0; j < matrices[i].length; j++) {
+                code += "0x" + matrices[i][j].toString(16).toUpperCase().padLeft(2, 0);
+                if (j !== matrices[i].length - 1) {
+                    code += ", ";
+                }
             }
+            code += " }";
+            if (i !== matrices.length - 1) {
+                code += ",";
+            }
+            code += "\n";
         }
-    
-        code += " };";
+        code += "};";
 
         return code;
     }
@@ -28,26 +35,27 @@ class CodeGenerator {
 
 class MatrixDesigner {
 
-    constructor(canvasOptions, textbox, defaultMatrix) {
-        this.matrix = defaultMatrix || [0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00];
+    constructor(canvasOptions, textbox) {
+        this.matrices = [[0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00]];
         this.canvasOptions = canvasOptions;
         this.codeGen = new CodeGenerator();
         this.textbox = textbox;
         this.canvasOptions.canvas.addEventListener("click", (event) => {
             this.handleCanvasClick(event);
         });
-
+        this.frames = 1;
+        this.currentFrame = 0;
         this.refresh();
     }
 
     handleCanvasClick(event) {
         
         // extract the x and y coordinates in terms of indices of the matrix
-        const x = this.matrix.length - 1 - Math.floor(event.offsetX / this.canvasOptions.width * this.matrix.length);
-        const y = Math.floor(event.offsetY / this.canvasOptions.height * this.matrix.length);
+        const x = this.matrices[this.currentFrame].length - 1 - Math.floor(event.offsetX / this.canvasOptions.width * this.matrices[this.currentFrame].length);
+        const y = Math.floor(event.offsetY / this.canvasOptions.height * this.matrices[this.currentFrame].length);
         
         // toggle the value of the matrix
-        this.matrix[y] = 0xFF & ~(this.matrix[y] ^ (0xFF ^ Math.pow(2, x)));
+        this.matrices[this.currentFrame][y] = 0xFF & ~(this.matrices[this.currentFrame][y] ^ (0xFF ^ Math.pow(2, x)));
 
         this.refresh(x, y);
 
@@ -59,14 +67,14 @@ class MatrixDesigner {
         } else {
             this.drawMatrix();
         }
-        this.textbox.innerText = this.codeGen.generateCode(this.matrix);
+        this.textbox.innerText = this.codeGen.generateCode(this.matrices);
     }
 
     drawMatrix() {
+        
+        for (let i = 0; i < this.matrices[this.currentFrame].length; i++) {
     
-        for (let i = 0; i < this.matrix.length; i++) {
-    
-            for (let j = 0; j < this.matrix.length; j++) {
+            for (let j = 0; j < this.matrices[this.currentFrame].length; j++) {
                 
                 this.drawSingleCircle(j, i);
                 
@@ -81,22 +89,22 @@ class MatrixDesigner {
         // fill the target area in black to prevent artifacts from appearing
         this.canvasOptions.context.fillStyle = "#000000";
         this.canvasOptions.context.fillRect(
-            x * this.canvasOptions.width / this.matrix.length,
-            y * this.canvasOptions.height / this.matrix.length,
-            this.canvasOptions.width / this.matrix.length,
-            this.canvasOptions.height / this.matrix.length);
+            x * this.canvasOptions.width / this.matrices[this.currentFrame].length,
+            y * this.canvasOptions.height / this.matrices[this.currentFrame].length,
+            this.canvasOptions.width / this.matrices[this.currentFrame].length,
+            this.canvasOptions.height / this.matrices[this.currentFrame].length);
 
         // set the color of the circle to draw
-        this.canvasOptions.context.fillStyle = ((this.matrix[y] & Math.pow(2, (this.matrix.length - 1) - x)) == 0)
+        this.canvasOptions.context.fillStyle = ((this.matrices[this.currentFrame][y] & Math.pow(2, (this.matrices[this.currentFrame].length - 1) - x)) == 0)
             ? this.canvasOptions.backColor
             : this.canvasOptions.foreColor;
 
         // draw the circle
         this.canvasOptions.context.beginPath();
         this.canvasOptions.context.arc(
-            (x + 0.5) * this.canvasOptions.width / this.matrix.length,
-            (y + 0.5) * this.canvasOptions.height / this.matrix.length,
-            this.canvasOptions.width / this.matrix.length / 2 * 0.70,
+            (x + 0.5) * this.canvasOptions.width / this.matrices[this.currentFrame].length,
+            (y + 0.5) * this.canvasOptions.height / this.matrices[this.currentFrame].length,
+            this.canvasOptions.width / this.matrices[this.currentFrame].length / 2 * 0.70,
             0, 2 * Math.PI, true);
         this.canvasOptions.context.closePath();
         this.canvasOptions.context.fill();
