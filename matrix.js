@@ -58,7 +58,7 @@ class MatrixDesigner {
 
     drawMatrix() {
     
-        this.canvasOptions.context.fillStyle = this.canvasOptions.backColor;
+        this.canvasOptions.context.fillStyle = "#000000"; //this.canvasOptions.backColor;
         this.canvasOptions.context.fillRect(0, 0, this.canvasOptions.width, this.canvasOptions.height);
     
         for (let i = 0; i < this.matrix.length; i++) {
@@ -76,11 +76,16 @@ class MatrixDesigner {
                 }
     
                 if (this.canvasOptions.context.fillStyle) {
-                    this.canvasOptions.context.fillRect(
-                        j * this.canvasOptions.width / this.matrix.length,
-                        i * this.canvasOptions.height / this.matrix.length,
-                        this.canvasOptions.width / this.matrix.length,
-                        this.canvasOptions.height / this.matrix.length);
+
+                    this.canvasOptions.context.beginPath();
+                    this.canvasOptions.context.arc(
+                        (j + 0.5) * this.canvasOptions.width / this.matrix.length,
+                        (i + 0.5) * this.canvasOptions.height / this.matrix.length,
+                        this.canvasOptions.width / this.matrix.length / 2 * 0.70,
+                        0, 2 * Math.PI, true);
+                    this.canvasOptions.context.closePath();
+                    this.canvasOptions.context.fill();
+                    
                 }
     
             }
@@ -92,7 +97,7 @@ class MatrixDesigner {
 
 function init() {
 
-    new MatrixDesigner(new CanvasOptions("canvas", "#FF0000", "#000000", 400, 400), document.getElementById("output"));
+    new MatrixDesigner(new CanvasOptions("canvas", "#FF0000", "#eaeaea", 400, 400), document.getElementById("output"));
 
 }
 
