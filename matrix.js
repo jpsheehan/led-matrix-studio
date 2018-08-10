@@ -41,48 +41,66 @@ class MatrixDesigner {
     }
 
     handleCanvasClick(event) {
-
+        
+        // extract the x and y coordinates in terms of indices of the matrix
         const x = this.matrix.length - 1 - Math.floor(event.offsetX / this.canvasOptions.width * this.matrix.length);
         const y = Math.floor(event.offsetY / this.canvasOptions.height * this.matrix.length);
-    
+        
+        // toggle the value of the matrix
         this.matrix[y] = 0xFF & ~(this.matrix[y] ^ (0xFF ^ Math.pow(2, x)));
 
-        this.refresh();
+        this.refresh(x, y);
 
     }
 
-    refresh() {
-        this.drawMatrix();
+    refresh(x, y) {
+        if (x !== null && typeof(x) != "undefined" && y !== null && typeof(y) != "undefined") {
+            this.drawSingleCircle(x, y);
+        } else {
+            this.drawMatrix();
+        }
         this.textbox.innerText = this.codeGen.generateCode(this.matrix);
     }
 
     drawMatrix() {
     
-        this.canvasOptions.context.fillStyle = "#000000";
-        this.canvasOptions.context.fillRect(0, 0, this.canvasOptions.width, this.canvasOptions.height);
-    
         for (let i = 0; i < this.matrix.length; i++) {
     
             for (let j = 0; j < this.matrix.length; j++) {
                 
-                // set the color of the circle to draw
-                this.canvasOptions.context.fillStyle = ((this.matrix[i] & Math.pow(2, (this.matrix.length - 1) - j)) == 0)
-                    ? this.canvasOptions.backColor
-                    : this.canvasOptions.foreColor;
-
-                    // draw the circle
-                this.canvasOptions.context.beginPath();
-                this.canvasOptions.context.arc(
-                    (j + 0.5) * this.canvasOptions.width / this.matrix.length,
-                    (i + 0.5) * this.canvasOptions.height / this.matrix.length,
-                    this.canvasOptions.width / this.matrix.length / 2 * 0.70,
-                    0, 2 * Math.PI, true);
-                this.canvasOptions.context.closePath();
-                this.canvasOptions.context.fill();
-    
+                this.drawSingleCircle(j, i);
+                
             }
     
         }
+    }
+
+    drawSingleCircle(x, y) {
+        x = 7 - x;
+        
+        // fill the target area in black to prevent artifacts from appearing
+        this.canvasOptions.context.fillStyle = "#000000";
+        this.canvasOptions.context.fillRect(
+            x * this.canvasOptions.width / this.matrix.length,
+            y * this.canvasOptions.height / this.matrix.length,
+            this.canvasOptions.width / this.matrix.length,
+            this.canvasOptions.height / this.matrix.length);
+
+        // set the color of the circle to draw
+        this.canvasOptions.context.fillStyle = ((this.matrix[y] & Math.pow(2, (this.matrix.length - 1) - x)) == 0)
+            ? this.canvasOptions.backColor
+            : this.canvasOptions.foreColor;
+
+        // draw the circle
+        this.canvasOptions.context.beginPath();
+        this.canvasOptions.context.arc(
+            (x + 0.5) * this.canvasOptions.width / this.matrix.length,
+            (y + 0.5) * this.canvasOptions.height / this.matrix.length,
+            this.canvasOptions.width / this.matrix.length / 2 * 0.70,
+            0, 2 * Math.PI, true);
+        this.canvasOptions.context.closePath();
+        this.canvasOptions.context.fill();
+
     }
 
 }
