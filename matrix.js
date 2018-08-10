@@ -11,7 +11,7 @@ class CanvasOptions {
 
 class CodeGenerator {
     generateCode(matrix) {
-        let code = "char graphic[] = { ";
+        let code = "char graphic[8] = { ";
     
         for (let i = 0; i < matrix.length; i++) {
             code += "0x" + matrix[i].toString(16).toUpperCase().padLeft(2, 0);
@@ -58,35 +58,27 @@ class MatrixDesigner {
 
     drawMatrix() {
     
-        this.canvasOptions.context.fillStyle = "#000000"; //this.canvasOptions.backColor;
+        this.canvasOptions.context.fillStyle = "#000000";
         this.canvasOptions.context.fillRect(0, 0, this.canvasOptions.width, this.canvasOptions.height);
     
         for (let i = 0; i < this.matrix.length; i++) {
     
             for (let j = 0; j < this.matrix.length; j++) {
-    
-                if ((this.matrix[i] & Math.pow(2, (this.matrix.length - 1) - j)) == 0) {
-    
-                    this.canvasOptions.context.fillStyle = this.canvasOptions.backColor;
-    
-                } else {
-                    
-                    this.canvasOptions.context.fillStyle = this.canvasOptions.foreColor;
-                    
-                }
-    
-                if (this.canvasOptions.context.fillStyle) {
+                
+                // set the color of the circle to draw
+                this.canvasOptions.context.fillStyle = ((this.matrix[i] & Math.pow(2, (this.matrix.length - 1) - j)) == 0)
+                    ? this.canvasOptions.backColor
+                    : this.canvasOptions.foreColor;
 
-                    this.canvasOptions.context.beginPath();
-                    this.canvasOptions.context.arc(
-                        (j + 0.5) * this.canvasOptions.width / this.matrix.length,
-                        (i + 0.5) * this.canvasOptions.height / this.matrix.length,
-                        this.canvasOptions.width / this.matrix.length / 2 * 0.70,
-                        0, 2 * Math.PI, true);
-                    this.canvasOptions.context.closePath();
-                    this.canvasOptions.context.fill();
-
-                }
+                    // draw the circle
+                this.canvasOptions.context.beginPath();
+                this.canvasOptions.context.arc(
+                    (j + 0.5) * this.canvasOptions.width / this.matrix.length,
+                    (i + 0.5) * this.canvasOptions.height / this.matrix.length,
+                    this.canvasOptions.width / this.matrix.length / 2 * 0.70,
+                    0, 2 * Math.PI, true);
+                this.canvasOptions.context.closePath();
+                this.canvasOptions.context.fill();
     
             }
     
