@@ -1,12 +1,3 @@
-
-const M = [
-    0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00
-];
-
-const canvas = document.getElementById("canvas");
-const ctx = canvas.getContext("2d");
-const textbox = document.getElementById("output");
-
 class CanvasOptions {
     constructor(id, foreColor, backColor, width, height) {
         this.canvas = document.getElementById(id);
@@ -22,9 +13,9 @@ class CodeGenerator {
     generateCode(matrix) {
         let code = "char graphic[] = { ";
     
-        for (let i = 0; i < M.length; i++) {
-            code += "0x" + M[i].toString(16).toUpperCase().padLeft(2, 0);
-            if (i !== M.length - 1) {
+        for (let i = 0; i < matrix.length; i++) {
+            code += "0x" + matrix[i].toString(16).toUpperCase().padLeft(2, 0);
+            if (i !== matrix.length - 1) {
                code += ", ";
             }
         }
@@ -37,25 +28,32 @@ class CodeGenerator {
 
 class MatrixDesigner {
 
-    constructor(canvasOptions, defaultMatrix) {
+    constructor(canvasOptions, textbox, defaultMatrix) {
         this.matrix = defaultMatrix || [0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00];
         this.canvasOptions = canvasOptions;
         this.codeGen = new CodeGenerator();
-        this.canvasOptions.addEventListener("click", this.handleCanvasClick);
+        this.textbox = textbox;
+        this.canvasOptions.canvas.addEventListener("click", (event) => {
+            this.handleCanvasClick(event);
+        });
+
+        this.refresh();
     }
 
     handleCanvasClick(event) {
 
-        const x = M.length - 1 - Math.floor(ev.offsetX / drawOptions.width * M.length);
-        const y = Math.floor(ev.offsetY / drawOptions.height * M.length);
+        const x = this.matrix.length - 1 - Math.floor(event.offsetX / this.canvasOptions.width * this.matrix.length);
+        const y = Math.floor(event.offsetY / this.canvasOptions.height * this.matrix.length);
     
-        M[y] = 0xFF & ~(M[y] ^ (0xFF ^ Math.pow(2, x)));
+        this.matrix[y] = 0xFF & ~(this.matrix[y] ^ (0xFF ^ Math.pow(2, x)));
+
+        this.refresh();
 
     }
 
     refresh() {
         this.drawMatrix();
-        this.codeGen.generateCode(this.matrix);
+        this.textbox.innerText = this.codeGen.generateCode(this.matrix);
     }
 
     drawMatrix() {
@@ -92,20 +90,9 @@ class MatrixDesigner {
 
 }
 
-const drawOptions = {
-    context: ctx,
-    foreColor: "#FF0000",
-    backColor: "#000000",
-    width: 400,
-    height: 400
-};
-
 function init() {
 
-    canvas.addEventListener("click", handleCanvasMouseEvent, false);
-
-    drawMatrix(M, drawOptions);
-    generateCCode();
+    new MatrixDesigner(new CanvasOptions("canvas", "#FF0000", "#000000", 400, 400), document.getElementById("output"));
 
 }
 
