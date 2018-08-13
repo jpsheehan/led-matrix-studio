@@ -36,7 +36,7 @@ class CodeGenerator {
 
 class MatrixDesigner {
 
-    constructor(canvasOptions, textbox, framePreviousButton, frameNextButton, frameNewButton, frameDisplay, animationFPS, animationPlayPauseButton, frameFirstButton, frameLastButton) {
+    constructor(canvasOptions, textbox, framePreviousButton, frameNextButton, frameNewButton, frameDisplay, animationFPS, animationPlayPauseButton, frameFirstButton, frameLastButton, frameDuplicateButton) {
         this.matrices = [[0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00]];
         this.canvasOptions = canvasOptions;
         this.codeGen = new CodeGenerator();
@@ -51,6 +51,7 @@ class MatrixDesigner {
             framePrevious: framePreviousButton,
             frameNext: frameNextButton,
             frameNew: frameNewButton,
+            frameDuplicate: frameDuplicateButton,
             frameDisplay: frameDisplay,
             animationFPS: animationFPS,
             animationPlayPause: animationPlayPauseButton
@@ -86,6 +87,13 @@ class MatrixDesigner {
 
         this.buttons.frameNew.addEventListener("click", () => {
             this.matrices.push([0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00]);
+            this.currentFrame = this.matrices.length - 1;
+            this.refreshButtons();
+            this.refresh();
+        });
+        
+        this.buttons.frameDuplicate.addEventListener("click", () => {
+            this.matrices.push(this.matrices[this.currentFrame].slice());
             this.currentFrame = this.matrices.length - 1;
             this.refreshButtons();
             this.refresh();
@@ -208,7 +216,8 @@ function init() {
         document.getElementById("anim-fps"),
         document.getElementById("anim-play-pause"),
         document.getElementById("frame-first"),
-        document.getElementById("frame-last")
+        document.getElementById("frame-last"),
+        document.getElementById("frame-duplicate")
     );
 
 }
