@@ -36,7 +36,9 @@ class CodeGenerator {
 
 class MatrixDesigner {
 
-    constructor(canvasOptions, textbox, framePreviousButton, frameNextButton, frameNewButton, frameDisplay, animationFPS, animationPlayPauseButton, frameFirstButton, frameLastButton, frameDuplicateButton) {
+    constructor(canvasOptions, textbox, framePreviousButton, frameNextButton,
+        frameNewButton, frameDisplay, animationFPS, animationPlayPauseButton,
+        frameFirstButton, frameLastButton, frameDuplicateButton, frameDeleteButton) {
         this.matrices = [[0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00]];
         this.canvasOptions = canvasOptions;
         this.codeGen = new CodeGenerator();
@@ -54,7 +56,8 @@ class MatrixDesigner {
             frameDuplicate: frameDuplicateButton,
             frameDisplay: frameDisplay,
             animationFPS: animationFPS,
-            animationPlayPause: animationPlayPauseButton
+            animationPlayPause: animationPlayPauseButton,
+            frameDelete: frameDeleteButton
         };
 
         this.buttons.frameFirst.addEventListener("click", () => {
@@ -97,6 +100,20 @@ class MatrixDesigner {
             this.currentFrame = this.matrices.length - 1;
             this.refreshButtons();
             this.refresh();
+        });
+
+        this.buttons.frameDelete.addEventListener("click", () => {
+            if (this.matrices.length == 1) {
+                this.matrices[this.currentFrame] = [0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00];
+                this.refresh();
+            } else {
+                this.matrices.splice(this.currentFrame, 1);
+                if (this.currentFrame >= this.matrices.length) {
+                    this.currentFrame = this.matrices.length - 1;
+                }
+                this.refresh();
+                this.refreshButtons();
+            }
         });
 
         this.buttons.animationPlayPause.addEventListener("click", () => {
@@ -164,6 +181,8 @@ class MatrixDesigner {
         this.buttons.frameDisplay.innerText = `Frame #${this.currentFrame + 1}`;
         this.buttons.animationFPS.disabled = (this.animationState == "playing");
         this.buttons.frameNew.disabled = (this.animationState == "playing");
+        this.buttons.frameDuplicate.disabled = (this.animationState == "playing");
+        this.buttons.frameDelete.disabled = (this.animationState == "playing");
     }
 
     drawMatrix() {
@@ -217,7 +236,8 @@ function init() {
         document.getElementById("anim-play-pause"),
         document.getElementById("frame-first"),
         document.getElementById("frame-last"),
-        document.getElementById("frame-duplicate")
+        document.getElementById("frame-duplicate"),
+        document.getElementById("frame-delete")
     );
 
 }
