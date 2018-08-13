@@ -11,7 +11,7 @@ class CanvasOptions {
 
 class CodeGenerator {
     generateCode(matrices) {
-        let code = `char graphic[${matrices.length}][${matrices[0].length}] = { `;
+        let code = `unsigned char graphic[${matrices.length}][${matrices[0].length}] = { `;
         
         for (let i = 0; i < matrices.length; i++) {
             code += "\n\t{ ";
