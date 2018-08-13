@@ -36,7 +36,7 @@ class CodeGenerator {
 
 class MatrixDesigner {
 
-    constructor(canvasOptions, textbox, framePreviousButton, frameNextButton, frameNewButton, frameDisplay, animationFPS, animationPlayPauseButton) {
+    constructor(canvasOptions, textbox, framePreviousButton, frameNextButton, frameNewButton, frameDisplay, animationFPS, animationPlayPauseButton, frameFirstButton, frameLastButton) {
         this.matrices = [[0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00]];
         this.canvasOptions = canvasOptions;
         this.codeGen = new CodeGenerator();
@@ -46,6 +46,8 @@ class MatrixDesigner {
         });
 
         this.buttons = {
+            frameFirst: frameFirstButton,
+            frameLast: frameLastButton,
             framePrevious: framePreviousButton,
             frameNext: frameNextButton,
             frameNew: frameNewButton,
@@ -53,6 +55,12 @@ class MatrixDesigner {
             animationFPS: animationFPS,
             animationPlayPause: animationPlayPauseButton
         };
+
+        this.buttons.frameFirst.addEventListener("click", () => {
+            this.currentFrame = 0;
+            this.refresh();
+            this.refreshButtons();
+        });
 
         this.buttons.framePrevious.addEventListener("click", () => {
             if (this.currentFrame > 0) {
@@ -68,6 +76,12 @@ class MatrixDesigner {
                 this.refreshButtons();
                 this.refresh();
             }
+        });
+        
+        this.buttons.frameLast.addEventListener("click", () => {
+            this.currentFrame = this.matrices.length - 1;
+            this.refresh();
+            this.refreshButtons();
         });
 
         this.buttons.frameNew.addEventListener("click", () => {
@@ -136,7 +150,9 @@ class MatrixDesigner {
 
     refreshButtons() {
         this.buttons.framePrevious.disabled = (this.currentFrame == 0 || this.animationState == "playing");
+        this.buttons.frameFirst.disabled = (this.currentFrame == 0 || this.animationState == "playing");
         this.buttons.frameNext.disabled = (this.currentFrame == this.matrices.length - 1 || this.animationState == "playing");
+        this.buttons.frameLast.disabled = (this.currentFrame == this.matrices.length - 1 || this.animationState == "playing");
         this.buttons.frameDisplay.innerText = `Frame #${this.currentFrame + 1}`;
         this.buttons.animationFPS.disabled = (this.animationState == "playing");
         this.buttons.frameNew.disabled = (this.animationState == "playing");
@@ -190,7 +206,9 @@ function init() {
         document.getElementById("frame-new"),
         document.getElementById("frame-display"),
         document.getElementById("anim-fps"),
-        document.getElementById("anim-play-pause")
+        document.getElementById("anim-play-pause"),
+        document.getElementById("frame-first"),
+        document.getElementById("frame-last")
     );
 
 }
